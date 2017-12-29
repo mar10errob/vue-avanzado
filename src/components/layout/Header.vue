@@ -1,12 +1,11 @@
 <template lang="pug">
-  section.hero.is-success
+  section.hero.is-primary
     .hero-head
-      header.nav
+      header.navbar
         .container
-          .nav-left
-            .nav-item
-              string Platzi Music
-          .nav-right.nav-menu
+          .navbar-brand
+            strong Platzi Music
+          .navbar-menu
     .hero-body
       .container.has-text-centered
         h1.title Platzi Music
