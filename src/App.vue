@@ -1,15 +1,47 @@
 <template lang="pug">
   #app
-    img(src="./assets/logo.png")
-    h1 {{ msg }}
-</template>
+    section.section
+      nav.nav.has-shadow
+        .container
+          input.input.is-large(
+            type = "text",
+            placeholder="Buscar",
+            v-model="searchQuery"
+          )
+          a.button.is-info.is-large(@click="search") Buscar
+          a.button.is-danger.is-large &times;
+      .container
+        p
+          small {{ searchMessage }}
 
+      .container
+        .columns
+          .column(v-for="track in tracks")
+            | {{ track.name }} - {{ track.artists[0].name }}
+</template>
 <script>
+import trackService from './services/track'
+
 export default {
   name: 'app',
   data () {
     return {
-      msg: 'Hola Vuejs!!'
+      searchQuery: '',
+      tracks: []
+    }
+  },
+  computed: {
+    searchMessage () {
+      return `Encontrados: ${this.tracks.length}`
+    }
+  },
+  methods: {
+    search () {
+      if (!this.searchQuery) { return }
+      trackService.search(this.searchQuery)
+        .then(response => {
+          this.tracks = response.tracks.items
+        })
     }
   }
 }
