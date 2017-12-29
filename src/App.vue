@@ -1,8 +1,12 @@
 <template lang="pug">
   #app
     pm-header
+
+    pm-notification(v-show="showNotification", :color="notify.type")
+      p(slot="body") {{ notify.message }}
+
     section.section
-      nav.navbar.has-shadow
+      nav.navbar
         .container
           input.input.is-large(
             type = "text",
@@ -18,7 +22,7 @@
       .container.results(v-show="!isLoading")
         .columns.is-multiline
           .column.is-one-quarter(v-for="track in tracks")
-            pm-track(:track="track")
+            pm-track(:class="{ 'is-active': track.id === selectedTrack }", :track="track", @select="setSelectedTrack")
     pm-footer
 </template>
 <script>
@@ -27,15 +31,22 @@ import PmFooter from '@/components/layout/Footer.vue'
 import PmHeader from '@/components/layout/Header.vue'
 import PmTrack from '@/components/Track.vue'
 import PmLoader from '@/components/shared/Loader.vue'
+import PmNotification from '@/components/shared/Notification.vue'
 
 export default {
   name: 'app',
-  components: { PmFooter, PmHeader, PmTrack, PmLoader },
+  components: { PmFooter, PmHeader, PmTrack, PmLoader, PmNotification },
   data () {
     return {
       searchQuery: '',
       tracks: [],
-      isLoading: false
+      isLoading: false,
+      selectedTrack: '',
+      showNotification: false,
+      notify: {
+        type: '',
+        message: ''
+      }
     }
   },
   computed: {
@@ -43,17 +54,43 @@ export default {
       return `Encontrados: ${this.tracks.length}`
     }
   },
+  watch: {
+    showNotification () {
+      if (this.showNotification) {
+        setTimeout(() => {
+          this.showNotification = false
+        }, 3000)
+      }
+    }
+  },
   methods: {
     search () {
-      if (!this.searchQuery) { return }
+      if (!this.searchQuery) {
+        this.showNotification = true
+        this.notify.type = 'is-danger'
+        this.notify.message = 'No se ha realizado ninguna busqueda.'
+
+        return
+      }
 
       this.isLoading = true
 
       trackService.search(this.searchQuery)
         .then(response => {
+          this.showNotification = true
+          if (response.tracks.total === 0) {
+            this.notify.type = 'is-danger'
+            this.notify.message = 'No se encontraron resultados.'
+          } else {
+            this.notify.type = 'is-success'
+            this.notify.message = `Se ha encontrado ${response.tracks.total} resultados`
+          }
           this.tracks = response.tracks.items
           this.isLoading = false
         })
+    },
+    setSelectedTrack (id) {
+      this.selectedTrack = id
     }
   }
 }
@@ -61,7 +98,11 @@ export default {
 <style lang="scss">
   @import './scss/main.scss';
 
-  .results{
+  .results {
     margin-top: 20px;
+  }
+
+  .is-active {
+    border: 3px #23d160 solid;
   }
 </style>
