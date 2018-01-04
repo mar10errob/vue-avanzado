@@ -4,8 +4,16 @@
       header.navbar
         .container
           .navbar-brand
-            strong Platzi Music
-          .navbar-menu
+            .navbar-item
+              strong Platzi Music
+            button.button.navbar-burger(:class="{ 'is-active': showMenu }", @click="onToogleMenu")
+              span
+              span
+              span
+          .navbar-menu(:class="{ 'is-active': showMenu }")
+            .navbar-end
+              router-link(:to="{ name: 'search' }").navbar-item Buscar
+              router-link(to="about").navbar-item Nosotros
     .hero-body
       .container.has-text-centered
         h1.title Platzi Music
@@ -15,6 +23,14 @@
 <script>
   import PmPlayer from '@/components/Player.vue'
   export default {
-    components: {PmPlayer}
+    data () {
+      return {
+        showMenu: false
+      }
+    },
+    components: {PmPlayer},
+    methods: {
+      onToogleMenu () { this.showMenu = !this.showMenu }
+    }
   }
 </script>
